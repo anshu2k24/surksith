@@ -58,7 +58,7 @@ Look through the "Issues" tab on GitHub. Issues marked `good first issue` are gr
 1.  Fork the repository to your own GitHub account.
 2.  Clone it locally:
     ```bash
-    git clone https://github.com/your-username/surksith.git
+    git clone https://github.com/anshu2k24/surksith.git
     ```
 3.  Create a separate branch for your feature/fix:
     ```bash
