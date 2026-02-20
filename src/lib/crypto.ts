@@ -36,7 +36,7 @@ export async function deriveKeyFromPassword(
     const key = await window.crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
-            salt: keySalt,
+            salt: keySalt as BufferSource,
             iterations: PBKDF2_ITERATIONS,
             hash: "SHA-256",
         },
