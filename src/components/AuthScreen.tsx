@@ -118,7 +118,7 @@ export function AuthScreen({ onAuthSuccess }: { onAuthSuccess: () => void }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2 mt-6 shadow-lg shadow-primary/20 disabled:opacity-50"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 mt-8 shadow-[0_8px_30px_rgb(79,70,229,0.3)] disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
                     >
                         {loading ? "Authenticating..." : (isLogin ? <><LockOpen size={18} /> Unlock Vault</> : "Initialize Vault")}
                     </button>
@@ -126,7 +126,7 @@ export function AuthScreen({ onAuthSuccess }: { onAuthSuccess: () => void }) {
 
                 <button
                     onClick={() => setIsLogin(!isLogin)}
-                    className="mt-6 text-sm text-slate-500 hover:text-primary transition-colors"
+                    className="mt-8 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
                 >
                     {isLogin ? "Don't have a vault? Create one" : "Already have a vault? Log in"}
                 </button>

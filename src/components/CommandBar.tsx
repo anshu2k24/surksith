@@ -93,7 +93,7 @@ export function CommandBar() {
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-8 left-1/2 -translate-x-1/2 glass-card px-6 py-3 flex items-center gap-3 text-slate-600 hover:text-slate-900 transition-all hover:scale-105 active:scale-95 z-50 shadow-2xl group"
+                className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-2xl px-6 py-3.5 flex items-center gap-3 text-slate-600 rounded-full border border-white/60 hover:text-slate-900 transition-all duration-300 hover:scale-105 active:scale-95 z-50 shadow-[0_8px_32px_rgba(31,38,135,0.07)] hover:shadow-[0_12px_44px_rgba(31,38,135,0.12)] group"
             >
                 <Search size={18} className="text-primary/70 group-hover:text-primary transition-colors" />
                 <span className="font-medium text-sm">Cmd + K to Command</span>
@@ -199,8 +199,8 @@ export function CommandBar() {
                                         }
                                     }}
                                     disabled={saving || !parseResult.site}
-                                    className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50">
-                                    {saving ? "Saving..." : <>Save to Vault <ChevronRight size={16} /></>}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 shadow-[0_8px_30px_rgb(79,70,229,0.3)] disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]">
+                                    {saving ? "Encrypting..." : <>Secure in Vault <ChevronRight size={16} /></>}
                                 </button>
                             </div>
                         </motion.div>

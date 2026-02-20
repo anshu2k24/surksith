@@ -77,12 +77,35 @@ export function Dashboard() {
             });
 
             // Self-destruct clipboard
-            setTimeout(async () => {
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText("");
-                }
+            setTimeout(() => {
+                const clearClipboard = async () => {
+                    try {
+                        if (navigator.clipboard && window.isSecureContext) {
+                            await navigator.clipboard.writeText("");
+                        } else {
+                            const textArea = document.createElement("textarea");
+                            textArea.value = "";
+                            textArea.style.position = "absolute";
+                            textArea.style.left = "-999999px";
+                            document.body.prepend(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            textArea.remove();
+                        }
+                        toast.info("Clipboard securely cleared.");
+                    } catch (clearError) {
+                        console.warn("Could not auto-clear clipboard.", clearError);
+                    } finally {
+                        window.removeEventListener('click', clearClipboard);
+                        window.removeEventListener('keydown', clearClipboard);
+                    }
+                };
+
+                // Wait for the next user interaction to clear the clipboard to bypass browser security policies
+                window.addEventListener('click', clearClipboard);
+                window.addEventListener('keydown', clearClipboard);
+
                 setCopiedId(null);
-                toast.info("Clipboard securely cleared.");
             }, 10000);
 
         } catch (e) {
@@ -100,8 +123,8 @@ export function Dashboard() {
     }
 
     return (
-        <div className="w-full max-w-5xl mx-auto mt-12 mb-20 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+        <div className="w-full max-w-5xl mx-auto mt-8 md:mt-12 mb-24 space-y-8 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 gap-6">
                 <div>
                     <h2 className="text-4xl font-semibold text-slate-800 tracking-tight mb-2">My Vault</h2>
                     <p className="text-slate-500 text-sm max-w-sm leading-relaxed">Your data is encrypted locally. Only you hold the keys.</p>
