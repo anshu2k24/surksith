@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { Mic, Search, Key, LogIn, ChevronRight, X, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useVault } from "./VaultProvider";
+import { encryptData } from "@/lib/crypto";
+import { supabase } from "@/utils/supabase/client";
 export function CommandBar() {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
@@ -13,6 +15,8 @@ export function CommandBar() {
         user?: string;
         pass?: string;
     } | null>(null);
+    const { masterKey } = useVault();
+    const [saving, setSaving] = useState(false);
 
     // Web Speech API fallback
     // @ts-ignore
@@ -159,8 +163,43 @@ export function CommandBar() {
                             </div>
 
                             <div className="mt-4 flex justify-end">
-                                <button className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                                    Save to Vault <ChevronRight size={16} />
+                                <button
+                                    onClick={async () => {
+                                        if (!masterKey || !parseResult.site || !parseResult.user || !parseResult.pass) return;
+                                        setSaving(true);
+                                        try {
+                                            const { data: { user } } = await supabase.auth.getUser();
+                                            if (!user) throw new Error("Not logged in");
+
+                                            // Encrypt the password completely client-side
+                                            const encryptedObj = await encryptData(parseResult.pass, masterKey);
+
+                                            const { error } = await supabase.from('vault').insert([{
+                                                user_id: user.id,
+                                                site_name: parseResult.site,
+                                                username: parseResult.user,
+                                                encrypted_password: encryptedObj,
+                                                // Simple categorization
+                                                category: parseResult.site.toLowerCase().includes('bank') ? 'Finance' : 'General'
+                                            }]);
+
+                                            if (error) throw error;
+
+                                            setQuery("");
+                                            setParseResult(null);
+                                            setIsOpen(false);
+                                            // Trigger reload by mutating a global state or forcing refresh
+                                            window.location.reload();
+                                        } catch (e) {
+                                            console.error(e);
+                                            alert("Failed to save.");
+                                        } finally {
+                                            setSaving(false);
+                                        }
+                                    }}
+                                    disabled={saving || !parseResult.site}
+                                    className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50">
+                                    {saving ? "Saving..." : <>Save to Vault <ChevronRight size={16} /></>}
                                 </button>
                             </div>
                         </motion.div>

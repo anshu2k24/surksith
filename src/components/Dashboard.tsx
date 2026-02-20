@@ -23,36 +23,31 @@ export function Dashboard() {
 
     // Load credentials logic would go here
     useEffect(() => {
-        // In a full implementation, fetch from Supabase here
-        // const fetchVault = async () => { ... }
+        const fetchVault = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-        // Mocking for now to demonstrate layout
-        const mockData: Credential[] = [
-            {
-                id: "mock1",
-                site_name: "Netflix",
-                username: "user@email.com",
-                encrypted_password: { ciphertext: "mock", iv: "mock" },
-                category: "Entertainment",
-            },
-            {
-                id: "mock2",
-                site_name: "Bank of America",
-                username: "bhavshank99",
-                encrypted_password: { ciphertext: "mock", iv: "mock" },
-                category: "Finance",
-            },
-        ];
-        setCredentials(mockData);
+            const { data, error } = await supabase
+                .from('vault')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Error fetching vault items", error);
+            } else if (data) {
+                setCredentials(data as Credential[]);
+            }
+        };
+
+        fetchVault();
     }, []);
 
     const handleCopy = async (id: string, ciphertext: string, iv: string) => {
         if (!masterKey) return;
         try {
-            // In a real flow, we would decrypt the real ciphertext here
-            // const plaintext = await decryptData(ciphertext, iv, masterKey);
+            // Client-side decryption happens here! Zero Knowledge!
+            const plaintext = await decryptData(ciphertext, iv, masterKey);
 
-            const plaintext = "MockDecryptedPassword123!"; // mock
             await navigator.clipboard.writeText(plaintext);
 
             setCopiedId(id);
@@ -94,7 +89,14 @@ export function Dashboard() {
                             <div className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${getCategoryColor(cred.category)}`}>
                                 {cred.category || "General"}
                             </div>
-                            <button className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                            <button
+                                onClick={async () => {
+                                    if (confirm("Are you sure you want to delete this credential?")) {
+                                        await supabase.from('vault').delete().eq('id', cred.id);
+                                        setCredentials(prev => prev.filter(c => c.id !== cred.id));
+                                    }
+                                }}
+                                className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
                                 <Trash2 size={16} />
                             </button>
                         </div>
@@ -106,8 +108,8 @@ export function Dashboard() {
                             <button
                                 onClick={() => handleCopy(cred.id, cred.encrypted_password.ciphertext, cred.encrypted_password.iv)}
                                 className={`w-full py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${copiedId === cred.id
-                                        ? "bg-green-500 text-white shadow-lg shadow-green-500/30"
-                                        : "bg-white/60 hover:bg-white text-slate-700 border border-white isolate"
+                                    ? "bg-green-500 text-white shadow-lg shadow-green-500/30"
+                                    : "bg-white/60 hover:bg-white text-slate-700 border border-white isolate"
                                     }`}
                             >
                                 {copiedId === cred.id ? (
