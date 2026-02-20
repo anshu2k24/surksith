@@ -40,7 +40,7 @@ export function AuthScreen({ onAuthSuccess }: { onAuthSuccess: () => void }) {
 
             // 2. Derive Client-Side Crypto Key from Master Password
             // This is NEVER sent to Supabase.
-            await setMasterPassword(masterPassword);
+            await setMasterPassword(masterPassword, email);
 
             onAuthSuccess();
         } catch (err: any) {

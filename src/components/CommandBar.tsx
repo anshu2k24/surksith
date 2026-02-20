@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Mic, Search, Key, LogIn, ChevronRight, X, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { useVault } from "./VaultProvider";
 import { encryptData } from "@/lib/crypto";
 import { supabase } from "@/utils/supabase/client";
@@ -108,11 +109,11 @@ export function CommandBar() {
             <div className="absolute inset-0" onClick={() => setIsOpen(false)} />
 
             <motion.div
-                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="w-full max-w-2xl bg-white/80 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white relative overflow-hidden"
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="w-full max-w-2xl bg-white/70 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white relative overflow-hidden ring-1 ring-slate-900/5"
             >
                 <div className="flex items-center px-4 py-4 border-b border-indigo-100/50">
                     <Search className="text-slate-400 mr-3" size={20} />
@@ -188,8 +189,8 @@ export function CommandBar() {
                                             setQuery("");
                                             setParseResult(null);
                                             setIsOpen(false);
-                                            // Trigger reload by mutating a global state or forcing refresh
-                                            window.location.reload();
+                                            window.dispatchEvent(new Event("vault-updated"));
+                                            toast.success("Saved to your Secure Vault!");
                                         } catch (e) {
                                             console.error(e);
                                             alert("Failed to save.");

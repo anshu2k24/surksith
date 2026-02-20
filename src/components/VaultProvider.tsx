@@ -5,7 +5,7 @@ import { deriveKeyFromPassword } from "@/lib/crypto";
 
 interface VaultContextType {
     masterKey: CryptoKey | null;
-    setMasterPassword: (password: string) => Promise<void>;
+    setMasterPassword: (password: string, email: string) => Promise<void>;
     isLocked: boolean;
     lockVault: () => void;
 }
@@ -17,11 +17,18 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 
     // We only store the derived key in state/memory, NOT the password itself.
     // When the window is closed, this state is lost.
-    const setMasterPassword = async (password: string) => {
+    const setMasterPassword = async (password: string, email: string) => {
         try {
-            // In a real app we'd fetch a user-specific salt from the DB based on their email.
-            // For this demo, we'll derive a key and keep it.
-            const { key } = await deriveKeyFromPassword(password);
+            // Derive a deterministic salt from the user's email
+            // This ensures the derived key is consistent across page reloads
+            const enc = new TextEncoder();
+            const emailBuffer = enc.encode(email);
+            const hashBuffer = await window.crypto.subtle.digest('SHA-256', emailBuffer);
+
+            // PBKDF2 salt expects a BufferSource. We use the first 16 bytes of the email hash.
+            const deterministicSalt = new Uint8Array(hashBuffer, 0, 16);
+
+            const { key } = await deriveKeyFromPassword(password, deterministicSalt);
             setMasterKey(key);
         } catch (error) {
             console.error("Failed to derive master key", error);
